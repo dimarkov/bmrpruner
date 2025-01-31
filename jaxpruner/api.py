@@ -17,7 +17,7 @@
 import copy
 import functools
 import logging
-from typing import Tuple
+from typing import Tuple, Type
 
 from jaxpruner import algorithms
 from jaxpruner import base_updater

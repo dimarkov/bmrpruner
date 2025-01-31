@@ -90,7 +90,8 @@ class BaseUpdaterTest(parameterized.TestCase, absltest.TestCase):
     self.assertEmpty(kwargs, 'Should not pass extra args to inner')
     sparse_updater.calculate_scores.assert_called_once()
     _, kwargs = sparse_updater.calculate_scores.call_args
-    self.assertDictContainsSubset({'foo': extra_arg}, kwargs)
+    expected = {'foo': extra_arg}
+    self.assertEqual(kwargs, {**kwargs, **expected})
 
   def testInstantSparsify(self):
     distribution_fn = mock.MagicMock()
@@ -122,7 +123,8 @@ class BaseUpdaterTest(parameterized.TestCase, absltest.TestCase):
     )
     sparse_updater.calculate_scores.assert_called_once()
     _, kwargs = sparse_updater.calculate_scores.call_args
-    self.assertDictContainsSubset({'foo': extra_arg}, kwargs)
+    expected = {'foo': extra_arg}
+    self.assertEqual(kwargs, {**kwargs, **expected})
 
   def testNoPruning(self):
     updater = base_updater.NoPruning()

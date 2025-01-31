@@ -29,7 +29,7 @@ class MagnitudePruning(BaseUpdater):
 
   def calculate_scores(self, params, sparse_state=None, grads=None):
     del sparse_state, grads
-    param_magnitudes = jax.tree_map(jnp.abs, params)
+    param_magnitudes = jax.tree.map(jnp.abs, params)
     return param_magnitudes
 
 
@@ -39,7 +39,7 @@ class SaliencyPruning(BaseUpdater):
 
   def calculate_scores(self, params, sparse_state=None, grads=None):
     del sparse_state
-    saliencies = jax.tree_map(lambda p, g: jnp.abs(p * g), params, grads)
+    saliencies = jax.tree.map(lambda p, g: jnp.abs(p * g), params, grads)
     return saliencies
 
 

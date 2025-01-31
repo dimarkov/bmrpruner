@@ -109,7 +109,7 @@ class BaseUpdater(object):
     """
     if is_packed is None:
       is_packed = self.use_packed_masks
-    return jax.tree_map(
+    return jax.tree.map(
         functools.partial(apply_mask, is_packed=is_packed), params, masks
     )
 
@@ -151,14 +151,14 @@ class BaseUpdater(object):
         return None
       return jnp.ones(p.shape, dtype=mask_calculator.MASK_DTYPE)
 
-    masks = jax.tree_map(mask_fn, params, target_sparsities)
+    masks = jax.tree.map(mask_fn, params, target_sparsities)
     return masks
 
   def create_masks(self, scores, sparsities):
     def topk_ifnot_none(score, sparsity):
       return None if sparsity is None else self.topk_fn(score, sparsity)
 
-    return jax.tree_map(topk_ifnot_none, scores, sparsities)
+    return jax.tree.map(topk_ifnot_none, scores, sparsities)
 
   def init_state(self, params):
     """Creates the sparsity state."""
@@ -169,7 +169,7 @@ class BaseUpdater(object):
     logging.info('target_sparsities: %s', target_sparsities)
     masks = self.get_initial_masks(params, target_sparsities)
     if self.use_packed_masks:
-      masks = jax.tree_map(jnp.packbits, masks)
+      masks = jax.tree.map(jnp.packbits, masks)
     return SparseState(
         masks=masks,
         target_sparsities=target_sparsities,
@@ -203,7 +203,7 @@ class BaseUpdater(object):
     )
     new_masks = self.create_masks(scores, sparsities)
     if self.use_packed_masks:
-      new_masks = jax.tree_map(jnp.packbits, new_masks)
+      new_masks = jax.tree.map(jnp.packbits, new_masks)
     return sparse_state._replace(masks=new_masks)
 
   def wrap_optax(
@@ -255,7 +255,7 @@ class BaseUpdater(object):
       def no_inner_update(updates, inner_state, params):
         # Set gradients to zero and don't update the step.
         del params
-        zero_updates = jax.tree_map(jnp.zeros_like, updates)
+        zero_updates = jax.tree.map(jnp.zeros_like, updates)
         return zero_updates, inner_state
 
       new_updates, new_inner_state = jax.lax.cond(
@@ -299,7 +299,7 @@ class BaseUpdater(object):
     masks = self.create_masks(scores, sparsities)
     masked_params = self.apply_masks(params, masks, is_packed=False)
     if self.use_packed_masks:
-      masks = jax.tree_map(jnp.packbits, masks)
+      masks = jax.tree.map(jnp.packbits, masks)
     return masked_params, masks
 
   def pre_forward_update(
@@ -338,7 +338,7 @@ class NoPruning(BaseUpdater):
       self, params, target_sparsities
   ):
     del target_sparsities
-    return jax.tree_map(lambda p: None, params)
+    return jax.tree.map(lambda p: None, params)
 
   def update_state(self, sparse_state, params, grads):
     """Identity operation, returns the state unmodified."""
