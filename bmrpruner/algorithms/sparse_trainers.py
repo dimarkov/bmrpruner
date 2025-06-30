@@ -19,8 +19,9 @@ import functools
 from typing import Callable
 
 import chex
-import jax
 import jax.numpy as jnp
+import jax.tree_util as jtu
+import jax.random as jr
 from bmrpruner import base_updater
 from bmrpruner.algorithms import pruners
 import optax
@@ -53,7 +54,7 @@ class StaticRandomSparse(base_updater.BaseUpdater):
 
 def _restart_using_mask(target_tree, masks):
   # Set values to zero where mask is 1.
-  return jax.tree.map(
+  return jtu.tree_map(
       lambda a, m: a if m is None else a * (1 - m), target_tree, masks
   )
 
@@ -130,10 +131,10 @@ class SET(StaticRandomSparse):
 
   def _get_drop_scores(self, sparse_state, params, grads):
     del sparse_state, grads
-    return jax.tree.map(jnp.abs, params)
+    return jtu.tree_map(jnp.abs, params)
 
   def _get_grow_scores(self, sparse_state, params, grads):
-    new_rng = jax.random.fold_in(self.rng_seed, sparse_state.count)
+    new_rng = jr.fold_in(self.rng_seed, sparse_state.count)
     random_scores = pruners.generate_random_scores(params, new_rng)
     return random_scores
 
@@ -145,14 +146,14 @@ class SET(StaticRandomSparse):
     update_masks_fn = functools.partial(
         self._update_masks, drop_fraction=current_drop_fraction
     )
-    new_masks = jax.tree.map(
+    new_masks = jtu.tree_map(
         lambda m, d, g: None if m is None else update_masks_fn(m, d, g),
         sparse_state.masks,
         drop_scores,
         grow_scores,
         is_leaf=lambda x: x is None,
     )
-    masks_activated = jax.tree.map(
+    masks_activated = jtu.tree_map(
         lambda old, new: None if old is None else (old == 0) & (new == 1),
         sparse_state.masks,
         new_masks,
@@ -173,4 +174,4 @@ class RigL(SET):
 
   def _get_grow_scores(self, sparse_state, params, grads):
     del sparse_state, params
-    return jax.tree.map(jnp.abs, grads)
+    return jtu.tree_map(jnp.abs, grads)

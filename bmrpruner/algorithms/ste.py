@@ -23,6 +23,7 @@ import chex
 import jax
 from bmrpruner import base_updater
 from bmrpruner.algorithms import pruners
+from bmrpruner.algorithms import BMRPruning
 
 
 @dataclasses.dataclass
@@ -69,5 +70,12 @@ class SteMagnitudePruning(SteMixin, pruners.MagnitudePruning):
 @dataclasses.dataclass
 class SteRandomPruning(SteMixin, pruners.RandomPruning):
   """Random pruner, which updates weight with straight through estimator."""
+
+  pass
+
+
+@dataclasses.dataclass
+class SteBMRPruning(SteMixin, BMRPruning):
+  """BMR pruner, which updates weight with straight through estimator."""
 
   pass

@@ -20,6 +20,7 @@ import logging
 from typing import Tuple, Type
 
 from bmrpruner import algorithms
+from bmrpruner.algorithms import bmr_pruners
 from bmrpruner import base_updater
 from bmrpruner import sparsity_distributions
 from bmrpruner import sparsity_schedules
@@ -30,6 +31,8 @@ import optax
 
 ALGORITHM_REGISTRY = {
     'no_prune': base_updater.NoPruning,
+    'bmr': bmr_pruners.BMRPruning,
+    'adaptive_bmr': bmr_pruners.AdaptiveBMRPruning,
     'magnitude': algorithms.MagnitudePruning,
     'random': algorithms.RandomPruning,
     'saliency': algorithms.SaliencyPruning,

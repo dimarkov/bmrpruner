@@ -18,6 +18,7 @@
 
 from bmrpruner.algorithms.global_pruners import GlobalMagnitudePruning
 from bmrpruner.algorithms.global_pruners import GlobalSaliencyPruning
+from bmrpruner.algorithms.global_pruners import GlobalBMRPruning
 from bmrpruner.algorithms.pruners import MagnitudePruning
 from bmrpruner.algorithms.pruners import RandomPruning
 from bmrpruner.algorithms.pruners import SaliencyPruning
@@ -26,3 +27,4 @@ from bmrpruner.algorithms.sparse_trainers import SET
 from bmrpruner.algorithms.sparse_trainers import StaticRandomSparse
 from bmrpruner.algorithms.ste import SteMagnitudePruning
 from bmrpruner.algorithms.ste import SteRandomPruning
+from bmrpruner.algorithms.bmr_pruners import BMRPruning

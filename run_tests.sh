@@ -1,5 +1,4 @@
 # coding=utf-8
-# Copyright 2024 Jaxpruner Authors.
 # Copyright 2024 BMRPruner Contributors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,13 +18,7 @@
 
 #!/bin/bash
 
-set -e
-set -x
 
-virtualenv -p python3 env
-source env/bin/activate
-
-pip install -r requirements.txt
 python -m bmrpruner.base_updater_test
 python -m bmrpruner.mask_calculator_test
 python -m bmrpruner.sparsity_distributions_test
