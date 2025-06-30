@@ -21,8 +21,8 @@ from typing import Callable
 import chex
 import jax
 import jax.numpy as jnp
-from jaxpruner import base_updater
-from jaxpruner.algorithms import pruners
+from bmrpruner import base_updater
+from bmrpruner.algorithms import pruners
 import optax
 
 

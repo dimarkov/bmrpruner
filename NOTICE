@@ -1,0 +1,22 @@
+BMRPruner
+Copyright 2024 BMRPruner Contributors
+
+This product includes software developed as part of JaxPruner.
+
+Portions of this software were originally developed by:
+Copyright 2024 Jaxpruner Authors (Google Research)
+
+Original JaxPruner source code is available at:
+https://github.com/google-research/jaxpruner
+
+This derivative work (BMRPruner) extends the original JaxPruner library
+to support Bayesian Model Reduction for neural network pruning.
+
+Major modifications include:
+- Package renamed from 'jaxpruner' to 'bmrpruner'
+- Added support for Bayesian Model Reduction algorithms
+- Extended documentation for IVON optimizer integration
+- Added support for generic PyTree structures (Equinox, etc.)
+- Maintained backward compatibility with original JaxPruner APIs
+
+All modifications are licensed under the Apache License, Version 2.0.

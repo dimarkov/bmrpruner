@@ -21,10 +21,10 @@ import chex
 import flax
 import jax
 import jax.numpy as jnp
-from jaxpruner import base_updater
-from jaxpruner import sparsity_distributions
-from jaxpruner import sparsity_types
-from jaxpruner.algorithms import pruners
+from bmrpruner import base_updater
+from bmrpruner import sparsity_distributions
+from bmrpruner import sparsity_types
+from bmrpruner.algorithms import pruners
 
 
 @dataclasses.dataclass

@@ -13,17 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This file contains apis to use the JaxPruner libraries."""
+"""This file contains apis to use the BMRPruner libraries."""
 import copy
 import functools
 import logging
 from typing import Tuple, Type
 
-from jaxpruner import algorithms
-from jaxpruner import base_updater
-from jaxpruner import sparsity_distributions
-from jaxpruner import sparsity_schedules
-from jaxpruner import sparsity_types
+from bmrpruner import algorithms
+from bmrpruner import base_updater
+from bmrpruner import sparsity_distributions
+from bmrpruner import sparsity_schedules
+from bmrpruner import sparsity_types
 import ml_collections
 import optax
 
@@ -78,14 +78,14 @@ def create_updater_from_config(
     updater = create_updater_from_config(sparsity_config)
   ```
 
-  - `algorithm`: str, one of jaxpruner.all_algorithm_names()
+  - `algorithm`: str, one of bmrpruner.all_algorithm_names()
   - `dist_type`: str, 'erk' or 'uniform'.
   - `update_freq`: int, passed to PeriodicSchedule.
   - `update_end_step`: int, passed to PeriodicSchedule.
   - `update_start_step`: int, if None or doesn't exist NoUpdateSchedule is
     used. If equal to `update_end_step`, OneShotSchedule is used. Otherwise
     PolynomialSchedule is used.
-  - `sparsity`: str, float or jaxpruner.SparsityType, if float, then
+  - `sparsity`: str, float or bmrpruner.SparsityType, if float, then
     SparsityType.Unstructured is used. If str in '{N}:{M}' format,
     then SparsityType.NbyM is used. If str in '{N}x{M}' format,
     then SparsityType.Block is used. User can also pass the desired
@@ -173,8 +173,8 @@ def create_updater_from_config(
   else:
     raise ValueError(
         f'Sparsity algorithm {config.algorithm} is not supported.'
-        ' Please use a key from jaxpruner.all_algorithm_names() or register'
-        ' the new algorithm using jaxpruner.register_algorithm().'
+        ' Please use a key from bmrpruner.all_algorithm_names() or register'
+        ' the new algorithm using bmrpruner.register_algorithm().'
     )
 
   if config.get('update_start_step', None) is None:

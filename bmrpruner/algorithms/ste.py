@@ -21,8 +21,8 @@ import dataclasses
 from typing import Optional
 import chex
 import jax
-from jaxpruner import base_updater
-from jaxpruner.algorithms import pruners
+from bmrpruner import base_updater
+from bmrpruner.algorithms import pruners
 
 
 @dataclasses.dataclass

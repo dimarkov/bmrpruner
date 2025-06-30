@@ -22,10 +22,10 @@ from typing import Any, Callable, NamedTuple, Optional, Tuple
 import chex
 import jax
 import jax.numpy as jnp
-from jaxpruner import mask_calculator
-from jaxpruner import sparsity_distributions
-from jaxpruner import sparsity_schedules
-from jaxpruner import sparsity_types
+from bmrpruner import mask_calculator
+from bmrpruner import sparsity_distributions
+from bmrpruner import sparsity_schedules
+from bmrpruner import sparsity_types
 import optax
 
 

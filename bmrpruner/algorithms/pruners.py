@@ -18,7 +18,7 @@ import dataclasses
 import chex
 import jax
 import jax.numpy as jnp
-from jaxpruner import base_updater
+from bmrpruner import base_updater
 
 BaseUpdater = base_updater.BaseUpdater
 

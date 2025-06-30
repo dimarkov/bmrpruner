@@ -1,4 +1,4 @@
-"""Jaxpruner setup configuration."""
+"""BMRPruner setup configuration."""
 from setuptools import find_packages
 from setuptools import setup
 
@@ -10,14 +10,14 @@ with open("README.md", "r", encoding="utf-8") as fh:
   long_description = fh.read()
 
 setup(
-    name="jaxpruner",
+    name="bmrpruner",
     version=__version__,
-    author="Google",
-    author_email="jaxpruner-dev@google.com",
-    description="JaxPruner: A concise library for sparsity research",
+    author="BMRPruner Contributors",
+    author_email="bmrpruner-dev@example.com",
+    description="BMRPruner: Bayesian Model Reduction for Neural Networks - A JaxPruner fork",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/google-research/jaxpruner",
+    url="https://github.com/your-username/bmrpruner",
     license="Apache 2.0",
     packages=find_packages(
         exclude=["*test.py", "algorithms/*.py"],
@@ -32,16 +32,19 @@ setup(
         "numpy",
         "ml-collections",
     ],
+    extras_require={
+        "bmr": ["ivon-optax"],
+        "equinox": ["equinox"],
+        "full": ["ivon-optax", "equinox"],
+    },
     dependency_links=[JAX_URL],
-    python_requires=">=3.8",
+    python_requires=">=3.11",
     classifiers=[
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: Apache Software License",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
+        "Topic :: Scientific/Engineering :: Mathematics",
+        "Programming Language :: Python :: 3.11",
     ],
 )
