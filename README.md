@@ -11,7 +11,7 @@ BMRPruner extends the excellent JaxPruner library to support **Bayesian Model Re
 - 🎯 **Bayesian Model Reduction**: Uncertainty-aware pruning of posterior distributions
 - 🔄 **JaxPruner Compatibility**: All original algorithms and APIs remain functional
 - 🌳 **Generic PyTree Support**: Works with Flax, Equinox, and any JAX-based models
-- 📊 **IVON Integration**: Seamless integration with posterior-tracking optimizers
+- 📊 **BLRAX Integration**: Seamless integration with posterior-tracking optimizers
 - 🔧 **Easy Migration**: Drop-in replacement for existing JaxPruner workflows
 - ⚡ **Minimal Overhead**: Maintains the performance characteristics of the original library
 
@@ -39,7 +39,7 @@ Traditional pruning methods remove parameters based on magnitude or gradient inf
 
 ### For Bayesian Model Reduction
 BMR requires optimizers that track posterior estimates (both mean and uncertainty):
-- **[IVON Optimizer](https://github.com/ysngshn/ivon-optax)** (recommended)
+- **[BLRAX Optimizer](https://github.com/dimarkov/blrax)** (recommended)
 - Other variational inference optimizers that maintain posterior distributions
 
 ### For Traditional Pruning (Backward Compatible)
@@ -52,11 +52,8 @@ BMR requires optimizers that track posterior estimates (both mean and uncertaint
 # Install BMRPruner
 pip install git+https://github.com/your-username/bmrpruner.git
 
-# For BMR functionality, also install IVON
-pip install git+https://github.com/ysngshn/ivon-optax.git
-
-# Optional: For Equinox model support
-pip install equinox
+# For BMR functionality, also install BLRAX
+pip install git+https://github.com/dimarkov/blrax.git
 ```
 
 Alternatively, clone and install from source:
@@ -82,18 +79,18 @@ pruner = bmrpruner.MagnitudePruning(**config)
 tx = pruner.wrap_optax(tx)
 ```
 
-### Bayesian Model Reduction with IVON
+### Bayesian Model Reduction with BLRAX
 
 ```python
 import bmrpruner
-import ivon
+import blrax
 
-# Setup IVON optimizer for posterior tracking
-optimizer = ivon.ivon(lr=0.01, ess=1000, hess_init=0.1)
+# Setup BLRAX optimizer for posterior tracking
+optimizer = blrax.ivon(lr=0.01, ess=1000, hess_init=0.1)
 optstate = optimizer.init(params)
 
 # Create BMR pruner
-bmr_pruner = bmrpruner.BayesianModelReduction(
+bmr_pruner = bmrpruner.BMRPruner(
     sparsity=0.8,
     uncertainty_threshold=0.1,
     reduction_schedule='polynomial'
@@ -103,7 +100,7 @@ tx = bmr_pruner.wrap_optax(optimizer)
 # Training loop with posterior sampling
 for step in range(num_steps):
     # Sample from posterior
-    param_sample, optstate = ivon.sample_parameters(key, params, optstate)
+    param_sample, optstate = blrax.sample_parameters(key, params, optstate)
     
     # Compute gradients
     loss, grads = jax.value_and_grad(loss_fn)(param_sample, batch)
@@ -118,20 +115,14 @@ for step in range(num_steps):
 ```python
 import equinox as eqx
 import bmrpruner
+import jax.random as jr
 
 # Works with any PyTree structure
-class EquinoxMLP(eqx.Module):
-    layers: list
-    
-    def __init__(self, key):
-        keys = jax.random.split(key, 3)
-        self.layers = [
-            eqx.nn.Linear(784, 256, key=keys[0]),
-            eqx.nn.Linear(256, 128, key=keys[1]),
-            eqx.nn.Linear(128, 10, key=keys[2])
-        ]
-
-model = EquinoxMLP(jax.random.PRNGKey(0))
+depth = 3
+in_size = 28 * 28
+out_size = 10
+num_neurons = 50
+model = eqx.nn.MLP(in_size, out_size, num_neurons, depth, key=jr.PRNGKey(0))
 
 # BMRPruner works seamlessly with Equinox models
 pruner = bmrpruner.MagnitudePruning(sparsity=0.9)
@@ -182,9 +173,9 @@ Migrating from JaxPruner to BMRPruner is straightforward:
 
 We welcome contributions! BMRPruner builds on the solid foundation of JaxPruner while extending it for Bayesian methods. Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-## Citation
+<!-- ## Citation
 
-If you use BMRPruner in your research, please cite both the original JaxPruner paper and the IVON optimizer:
+If you use BMRPruner in your research, please cite both the original JaxPruner paper and the BLRAX optimizer:
 
 ```bibtex
 @inproceedings{jaxpruner,
@@ -193,17 +184,17 @@ If you use BMRPruner in your research, please cite both the original JaxPruner p
   year={2023}
 }
 
-@inproceedings{ivon,
-  title={Variational Learning is Effective for Large Deep Networks},
-  author={Y. Shen and N. Daheim and B. Cong and P. Nickl and G.M. Marconi and C. Bazan and R. Yokota and I. Gurevych and D. Cremers and M.E. Khan and T. Möllenhoff},
+@inproceedings{blrax,
+  title={BLRAX: A Bayesian Library for Ranking, Aggregation, and Explanation},
+  author={D. Markov and M. E. Khan},
   booktitle={International Conference on Machine Learning (ICML)},
   year={2024}
 }
-```
+``` -->
 
 ## Acknowledgments
 
-BMRPruner is built upon the excellent [JaxPruner](https://github.com/google-research/jaxpruner) library. We thank the original authors for their foundational work in JAX-based sparsity research. The Bayesian Model Reduction capabilities are enabled by the [IVON optimizer](https://github.com/ysngshn/ivon-optax) for variational inference.
+BMRPruner is built upon the excellent [JaxPruner](https://github.com/google-research/jaxpruner) library. We thank the original authors for their foundational work in JAX-based sparsity research. The Bayesian Model Reduction capabilities are enabled by the [IVON optimizer](https://arxiv.org/abs/2402.17641) for variational inference as implemented in [blrax](https://github.com/dimarkov/blrax) repo.
 
 ## License and Attribution
 
@@ -216,7 +207,7 @@ This project is a derivative work of [JaxPruner](https://github.com/google-resea
 **Major Modifications Made:**
 - Package renamed from 'jaxpruner' to 'bmrpruner'
 - Added support for Bayesian Model Reduction algorithms
-- Extended documentation for IVON optimizer integration  
+- Extended documentation for BLRAX optimizer integration
 - Added support for generic PyTree structures (Equinox, etc.)
 - Maintained backward compatibility with original JaxPruner APIs
 
@@ -224,4 +215,4 @@ See the [NOTICE](NOTICE) file for complete attribution details.
 
 ## Disclaimer
 
-This is a research library extending JaxPruner for Bayesian Model Reduction. While we maintain backward compatibility, this is not an officially supported Google product and it is not affiliated with Google in any way.
+This is a research library extending JaxPruner for Bayesian Model Reduction. While we maintain backward compatibility, this is not an officially supported Google product and is not affiliated with Google in any way.

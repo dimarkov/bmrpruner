@@ -31,12 +31,9 @@ setup(
         "optax",
         "numpy",
         "ml-collections",
+        "equinox",
+        "blrax @ git+https://github.com/dimarkov/blrax.git"
     ],
-    extras_require={
-        "bmr": ["ivon-optax"],
-        "equinox": ["equinox"],
-        "full": ["ivon-optax", "equinox"],
-    },
     dependency_links=[JAX_URL],
     python_requires=">=3.11",
     classifiers=[

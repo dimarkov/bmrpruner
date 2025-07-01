@@ -1,12 +1,7 @@
 chex
 flax
 jax
-jaxlib
 optax
-numpy
 ml-collections
-
-# Optional dependencies for BMR functionality
-# Install with: pip install -r requirements.txt
-# For BMR: pip install ivon-optax
-# For Equinox support: pip install equinox
+equinox
+blrax @ git+https://github.com/dimarkov/blrax.git
