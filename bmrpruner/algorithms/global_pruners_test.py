@@ -19,7 +19,7 @@ from absl.testing import parameterized
 
 import chex
 import jax.numpy as jnp
-from jaxpruner.algorithms import global_pruners
+from bmrpruner.algorithms import global_pruners
 
 
 class GlobalPrunerTest(parameterized.TestCase, absltest.TestCase):

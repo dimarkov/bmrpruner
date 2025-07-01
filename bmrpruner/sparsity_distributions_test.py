@@ -18,7 +18,7 @@ from absl.testing import absltest
 from absl.testing import parameterized
 import flax
 import jax.numpy as jnp
-from jaxpruner import sparsity_distributions
+from bmrpruner import sparsity_distributions
 import numpy as np
 
 

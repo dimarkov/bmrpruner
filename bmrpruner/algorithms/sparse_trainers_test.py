@@ -21,8 +21,8 @@ from absl.testing import parameterized
 import chex
 import jax
 import jax.numpy as jnp
-from jaxpruner import sparsity_distributions
-from jaxpruner.algorithms import sparse_trainers
+from bmrpruner import sparsity_distributions
+from bmrpruner.algorithms import sparse_trainers
 import optax
 
 

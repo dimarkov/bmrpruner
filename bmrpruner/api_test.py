@@ -17,10 +17,10 @@
 import inspect
 from absl.testing import absltest
 
-import jaxpruner
-from jaxpruner import api
-from jaxpruner import sparsity_schedules
-from jaxpruner import sparsity_types
+import bmrpruner
+from bmrpruner import api
+from bmrpruner import sparsity_schedules
+from bmrpruner import sparsity_types
 import ml_collections
 
 

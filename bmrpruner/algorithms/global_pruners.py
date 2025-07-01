@@ -25,7 +25,7 @@ from bmrpruner import base_updater
 from bmrpruner import sparsity_distributions
 from bmrpruner import sparsity_types
 from bmrpruner.algorithms import pruners
-from.bmrpruner.algorithms import BMRPruner
+from bmrpruner.algorithms import bmr_pruners
 
 
 @dataclasses.dataclass
@@ -130,7 +130,7 @@ class GlobalSaliencyPruning(GlobalPruningMixin, pruners.SaliencyPruning):
   pass
 
 @dataclasses.dataclass
-class GlobalBMRPruning(GlobalPruningMixin, BMRPruner):
+class GlobalBMRPruning(GlobalPruningMixin, bmr_pruners.BMRPruning):
   """BMR pruner with global ordering."""
 
   pass

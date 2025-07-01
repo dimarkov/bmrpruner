@@ -19,7 +19,7 @@ import functools
 from typing import Callable
 import jax
 import jax.numpy as jnp
-from jaxpruner import sparsity_types
+from bmrpruner import sparsity_types
 import numpy as np
 
 

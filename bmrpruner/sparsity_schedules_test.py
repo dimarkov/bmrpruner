@@ -17,7 +17,7 @@
 from absl.testing import absltest
 from absl.testing import parameterized
 import jax
-from jaxpruner import sparsity_schedules as schedules
+from bmrpruner import sparsity_schedules as schedules
 
 
 class SparsityUtilsTest(parameterized.TestCase, absltest.TestCase):

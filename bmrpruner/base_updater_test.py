@@ -21,10 +21,10 @@ from absl.testing import absltest
 from absl.testing import parameterized
 import chex
 import jax.numpy as jnp
-from jaxpruner import base_updater
-from jaxpruner import sparsity_distributions
-from jaxpruner import sparsity_schedules
-from jaxpruner import sparsity_types
+from bmrpruner import base_updater
+from bmrpruner import sparsity_distributions
+from bmrpruner import sparsity_schedules
+from bmrpruner import sparsity_types
 
 
 class BaseUpdaterTest(parameterized.TestCase, absltest.TestCase):

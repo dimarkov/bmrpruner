@@ -17,7 +17,7 @@
 from absl.testing import absltest
 from absl.testing import parameterized
 import jax.numpy as jnp
-from jaxpruner import utils
+from bmrpruner import utils
 
 
 class UtilsTest(parameterized.TestCase, absltest.TestCase):

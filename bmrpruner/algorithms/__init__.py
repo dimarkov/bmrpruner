@@ -26,5 +26,6 @@ from bmrpruner.algorithms.sparse_trainers import RigL
 from bmrpruner.algorithms.sparse_trainers import SET
 from bmrpruner.algorithms.sparse_trainers import StaticRandomSparse
 from bmrpruner.algorithms.ste import SteMagnitudePruning
+from bmrpruner.algorithms.ste import SteBMRPruning
 from bmrpruner.algorithms.ste import SteRandomPruning
 from bmrpruner.algorithms.bmr_pruners import BMRPruning

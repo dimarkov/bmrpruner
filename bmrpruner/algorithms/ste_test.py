@@ -23,9 +23,9 @@ from absl.testing import parameterized
 import chex
 import jax
 import jax.numpy as jnp
-from jaxpruner import sparsity_distributions
-from jaxpruner import utils
-from jaxpruner.algorithms import ste
+from bmrpruner import sparsity_distributions
+from bmrpruner import utils
+from bmrpruner.algorithms import ste
 import optax
 
 

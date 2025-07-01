@@ -19,8 +19,8 @@ from absl.testing import absltest
 from absl.testing import parameterized
 import jax
 import jax.numpy as jnp
-from jaxpruner import mask_calculator
-from jaxpruner import sparsity_types
+from bmrpruner import mask_calculator
+from bmrpruner import sparsity_types
 
 
 SCORE_1 = [
