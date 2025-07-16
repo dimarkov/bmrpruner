@@ -82,25 +82,39 @@ tx = pruner.wrap_optax(tx)
 ### Bayesian Model Reduction with BLRAX
 
 ```python
-import bmrpruner
 import blrax
+import bmrpruner
+import ml_collections
 
 # Setup BLRAX optimizer for posterior tracking
 optimizer = blrax.ivon(lr=0.01, ess=1000, hess_init=0.1)
-optstate = optimizer.init(params)
 
-# Create BMR pruner
-bmr_pruner = bmrpruner.BMRPruner(
-    sparsity=0.8,
-    uncertainty_threshold=0.1,
-    reduction_schedule='polynomial'
-)
-tx = bmr_pruner.wrap_optax(optimizer)
+config = ml_collections.ConfigDict()
+config.algorithm = 'bmr'
+config.update_freq = 10
+config.update_end_step = 2000
+config.update_start_step = 500
+config.sparsity = 0.95
+config.dist_type = 'erk'
+
+# create BMR pruner
+sparsity_updater = bmrpruner.create_updater_from_config(config)
+optimizer = sparsity_updater.wrap_optax(optimizer)
+optstate = optimizer.init(params)
 
 # Training loop with posterior sampling
 for step in range(num_steps):
     # Sample from posterior
-    param_sample, optstate = blrax.sample_parameters(key, params, optstate)
+    loss, grads, inner_state = blrax.noisy_value_and_grad(
+      loss_fn,
+      optstate.inner_state,
+      params,
+      rng_key
+      mc_samples=mc_samples,
+      mask=optstate.masks
+    )
+
+    optstate = optstate._replace(inner_state)
     
     # Compute gradients
     loss, grads = jax.value_and_grad(loss_fn)(param_sample, batch)
@@ -110,7 +124,7 @@ for step in range(num_steps):
     params = optax.apply_updates(params, updates)
 ```
 
-### Generic PyTree Support (Equinox Example)
+### TODO: Generic PyTree Support (Equinox Example)
 
 ```python
 import equinox as eqx
