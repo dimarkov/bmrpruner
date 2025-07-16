@@ -120,7 +120,7 @@ for step in range(num_steps):
     loss, grads = jax.value_and_grad(loss_fn)(param_sample, batch)
     
     # Update with BMR
-    updates, optstate = tx.update(grads, optstate, params)
+    updates, optstate = optimizer.update(grads, optstate, params)
     params = optax.apply_updates(params, updates)
 ```
 
