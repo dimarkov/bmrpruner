@@ -58,11 +58,11 @@ class GlobalPruningMixin:
     )
 
   def instant_sparsify(
-      self, params, grads = None
+      self, params, grads = None, **kwargs
   ):
     # Global sparsity doesn't require sparsity distribution as it uses
     # global ordering of scores.
-    scores = self.calculate_scores(params, grads=grads)
+    scores = self.calculate_scores(params, grads=grads, **kwargs)
     masks = self.create_masks(scores, self.sparsity)
     if self.use_packed_masks:
       masks = jax.tree.map(jnp.packbits, masks)
@@ -81,39 +81,45 @@ class GlobalPruningMixin:
       else:
         return score
 
-    flat_scores = flax.traverse_util.flatten_dict(scores)
-    filtered_scores = {
-        k: _maybe_normalize(score)
-        for k, score in flat_scores.items()
-        if _unified_filter_fn(k, score)
-    }
-    ordered_keys = sorted(filtered_scores.keys())
+    def _func1(path, score):
+      if _unified_filter_fn(path, score):
+        return _maybe_normalize(score)
 
-    filtered_scores_concat = jnp.concatenate(
-        [filtered_scores[k] for k in ordered_keys], axis=None
+    filtered_scores = jax.tree.map_with_path(
+      lambda path, score: _func1(path, score),
+      scores
     )
 
+    leaves, tree = jax.tree.flatten(filtered_scores)
+    filtered_scores_concat = jnp.concatenate(leaves, axis=None)
+
     flat_mask_concat = self.topk_fn(filtered_scores_concat, target_sparsity)
-    res_dict = {}
+
+    res = []
     cur_index = 0
-    for k in ordered_keys:
-      param = filtered_scores[k]
+    for param in leaves:
       next_index = cur_index + param.size
       flat_mask = flat_mask_concat[cur_index:next_index]
-      res_dict[k] = jnp.reshape(flat_mask, param.shape)
+      res.append(jnp.reshape(flat_mask, param.shape))
       cur_index = next_index
 
-    for k, score in flat_scores.items():
-      if k in ordered_keys:
-        pass
-      elif k in custom_sparsity_map:
-        res_dict[k] = self.topk_fn(score, custom_sparsity_map[k])
-      else:
-        res_dict[k] = None
-    return_val = flax.traverse_util.unflatten_dict(res_dict)
-    if isinstance(scores, flax.core.frozen_dict.FrozenDict):
-      return_val = flax.core.freeze(return_val)
-    return return_val
+    mask1 = jax.tree.unflatten(tree, res)
+    
+    def _func2(path, score):
+      if path in custom_sparsity_map:
+        return self.topk_fn(score, custom_sparsity_map[path])
+      
+    mask2 = jax.tree.map_with_path(lambda path, score: _func2(path, score), scores)
+    
+    def _func3(a, b):
+      if a is not None:
+        return a
+      elif b is not None:
+        return b
+      
+    return jax.tree.map(
+      lambda a, b: _func3(a, b), mask1, mask2, is_leaf=lambda x: x is None
+    )
 
 
 @dataclasses.dataclass

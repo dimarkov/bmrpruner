@@ -28,6 +28,7 @@ import chex
 import flax
 import jax
 import numpy as np
+import equinox as eqx
 
 FilterFnType = Callable[[Tuple[str], chex.Array], bool]
 CustomSparsityMapType = Mapping[Tuple[str], float]
@@ -72,19 +73,7 @@ def uniform(
   if isinstance(params, chex.Array):
     return _get_sparsity(('kernel',), params)
 
-  elif isinstance(params, list):
-    return jax.tree.map(lambda p: _get_sparsity('', p), params)
-
-  flat_dict = flax.traverse_util.flatten_dict(params)
-  res_dict = {}
-  for k, p in flat_dict.items():
-    res_dict[k] = _get_sparsity(k, p)
-
-  return_val = flax.traverse_util.unflatten_dict(res_dict)
-  if isinstance(params, flax.core.frozen_dict.FrozenDict):
-    return_val = flax.core.freeze(return_val)
-  logging.info('Sparsities %s', return_val)
-  return return_val
+  return jax.tree.map_with_path(lambda path, p: _get_sparsity(path, p), params)
 
 
 def erk(
@@ -115,30 +104,15 @@ def erk(
         'Single parameter is provided. Please provide a paramater tree.'
     )
 
-  flat_dict = flax.traverse_util.flatten_dict(param_tree)
-  filtered_shape_dict = {
-      k: p.shape for k, p in flat_dict.items() if filter_fn(k, p)
-  }
-
-  sparsities = get_sparsities_erdos_renyi(
-      filtered_shape_dict, sparsity, custom_sparsity_map
+  return get_sparsities_erdos_renyi(
+      param_tree, sparsity, custom_sparsity_map
   )
-  res_dict = {
-      k: sparsities[k] if k in sparsities else None
-      for k, p in flat_dict.items()
-  }
-  return_val = flax.traverse_util.unflatten_dict(res_dict)
-  if isinstance(param_tree, flax.core.frozen_dict.FrozenDict):
-    return_val = flax.core.freeze(return_val)
-  return return_val
-
 
 def get_n_zeros(size, sparsity):
   return int(np.floor(sparsity * size))
 
-
 def get_sparsities_erdos_renyi(
-    var_shape_dict,
+    param_tree,
     default_sparsity,
     custom_sparsity_map=None,
     include_kernel=True,
@@ -157,7 +131,7 @@ def get_sparsities_erdos_renyi(
   # where p_i is np.sum(var_i.shape) / np.prod(var_i.shape)
   # for each i, eps*p_i needs to be in [0, 1].
   Args:
-    var_shape_dict: dict, of shape of all Variables to prune.
+    var_tree: PyTree, with leaves corresponding to shapes of all variables to prune.
     default_sparsity: float, between 0 and 1.
     custom_sparsity_map: dict or None, <str, float> key/value pairs where the
       mask correspond whose name is '{key}/mask:0' is set to the corresponding
@@ -179,7 +153,7 @@ def get_sparsities_erdos_renyi(
       include_kernel,
       erk_power_scale,
   )
-  if not var_shape_dict:
+  if not param_tree:
     raise ValueError('Variable shape dictionary should not be empty')
   if default_sparsity is None or default_sparsity < 0 or default_sparsity > 1:
     raise ValueError('Default sparsity should be a value between 0 and 1.')
@@ -196,6 +170,7 @@ def get_sparsities_erdos_renyi(
   # epsilon. Note that for each iteration we add at least one variable to the
   # custom_sparsity_map and therefore this while loop should terminate.
   dense_layers = set()
+  leaves, tree = jax.tree.flatten_with_path(param_tree)
   while not is_eps_valid:
     # We will start with all layers and try to find right epsilon. However if
     # any probablity exceeds 1, we will make that layer dense and repeat the
@@ -214,8 +189,10 @@ def get_sparsities_erdos_renyi(
 
     divisor = 0
     rhs = 0
+    max_prob = 0.0
     raw_probabilities = {}
-    for var_name, var_shape in var_shape_dict.items():
+    for var_name, p in leaves:
+      var_shape = p.shape
       n_param = np.prod(var_shape)
       n_zeros = get_n_zeros(n_param, default_sparsity)
       if var_name in dense_layers:
@@ -241,13 +218,14 @@ def get_sparsities_erdos_renyi(
         # Note that raw_probabilities[mask] * n_param gives the individual
         # elements of the divisor.
         divisor += raw_probabilities[var_name] * n_param
+        if max_prob < raw_probabilities[var_name]:
+          max_prob = raw_probabilities[var_name]
 
     # By multipliying individual probabilites with epsilon, we should get the
     # number of parameters per layer correctly.
     eps = rhs / divisor
     # If eps * raw_probabilities[mask.name] > 1. We set the sparsities of that
     # mask to 0., so they become part of dense_layers sets.
-    max_prob = np.max(list(raw_probabilities.values()))
     max_prob_one = max_prob * eps
     if max_prob_one > 1:
       is_eps_valid = False
@@ -258,24 +236,25 @@ def get_sparsities_erdos_renyi(
     else:
       is_eps_valid = True
 
-  sparsities = {}
+  sparsities = []
   # With the valid epsilon, we can set sparsities of the remaning layers.
-  for var_name, var_shape in var_shape_dict.items():
+  for var_name, p in leaves:
+    var_shape = p.shape
     n_param = np.prod(var_shape)
     if var_name in custom_sparsity_map:
-      sparsities[var_name] = custom_sparsity_map[var_name]
+      sparsities.append(custom_sparsity_map[var_name])
       logging.info(
-          'layer: %s has custom sparsity: %f', var_name, sparsities[var_name]
+          'layer: %s has custom sparsity: %f', var_name, sparsities[-1]
       )
     elif var_name in dense_layers:
-      sparsities[var_name] = 0.0
+      sparsities.append(0.0)
     else:
       probability_one = eps * raw_probabilities[var_name]
-      sparsities[var_name] = 1.0 - probability_one
+      sparsities.append(1.0 - probability_one)
     logging.info(
         'layer: %s, shape: %s, sparsity: %f',
         var_name,
         var_shape,
-        sparsities[var_name],
+        sparsities[-1],
     )
-  return sparsities
+  return jax.tree.unflatten(tree, sparsities)
