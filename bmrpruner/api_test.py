@@ -36,7 +36,7 @@ class ScenicConfigTest(absltest.TestCase):
     sparsity_config.dist_type = 'erk'
     updater = api.create_updater_from_config(sparsity_config)
 
-    self.assertIsInstance(updater, jaxpruner.MagnitudePruning)
+    self.assertIsInstance(updater, bmrpruner.MagnitudePruning)
 
     self.assertIsInstance(updater.sparsity_type, sparsity_types.Unstructured)
 
@@ -61,7 +61,7 @@ class ScenicConfigTest(absltest.TestCase):
     sparsity_config.algorithm = 'no_prune'
     updater = api.create_updater_from_config(sparsity_config)
 
-    self.assertIsInstance(updater, jaxpruner.NoPruning)
+    self.assertIsInstance(updater, bmrpruner.NoPruning)
 
   def testCreateUpdaterErrorWithWrongDistFn(self):
     sparsity_config = ml_collections.ConfigDict()
