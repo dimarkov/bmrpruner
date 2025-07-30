@@ -45,11 +45,11 @@ class AbosluteZscorePruning(BaseUpdater):
         )
     
     # Get posterior scale from hessian.
-    sigma = lambda h:  lax.rsqrt(state.ess * (h + state.weight_decay))
+    inv_sigma = lambda h:  jnp.sqrt(state.ess * (h + state.weight_decay))
     
     # Score is magnitude / variance. High score = important.
     scores = jax.tree.map(
-        lambda mean, h: jnp.abs(mean) / (sigma(h) + 1e-12), params, state.hess
+        lambda mean, h: jnp.abs(mean) * inv_sigma, params, state.hess
     )
     return scores
 
